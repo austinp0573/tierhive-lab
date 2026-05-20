@@ -10,7 +10,7 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-echo "1. Kernel Module Blacklist and Initramfs"
+echo "1. kernel module blacklist and initramfs"
 
 cat > /etc/modprobe.d/blacklist-unnecessary.conf << 'EOF'
 # Graphics (headless server)
@@ -75,14 +75,13 @@ sed -i 's/default_kernel_opts="/default_kernel_opts="ipv6.disable=1 audit=0 nowa
 
 mkinitfs
 
-echo "2. Remove Cloud-Init and python dependencies"
-echo "you can remove the py3-|python3|pyc part if you would like to keep python"
-echo "-------------------------------------------------------------------------"
+echo "2. removing cloud-init and python dependencies"
+echo "   (remove the py3-|python3|pyc grep if you want to keep python)"
 
 # Remove cloud-init and python dependencies dynamically
 apk del $(grep "^P:" /lib/apk/db/installed | sed 's/^P://' | grep -E "^(cloud-init|cloud-utils|py3-|python3|pyc)")
 
-echo "3. Package Cleanup"
+echo "3. package cleanup"
 # Swap Chrony for Busybox ntpd
 if rc-service chronyd status 2>/dev/null; then
     rc-service chronyd stop
@@ -92,7 +91,7 @@ rc-update add ntpd default
 apk del chrony chrony-openrc
 
 # Remove non-runtime utilities and hypervisor tools
-apk del bash sudo doas nvme-cli syslinux mtools numactl curl e2fsprogs-extra partx qemu-guest-agent qemu-guest-agent-openrc
+apk del bash sudo nvme-cli syslinux mtools numactl curl e2fsprogs-extra partx qemu-guest-agent qemu-guest-agent-openrc
 
 # Remove orphaned libraries
 apk del readline gdbm mpdecimal sqlite-libs yaml p11-kit libtasn1 gnutls nettle gmp libidn2 libunistring libexpat libedit libffi shadow tzdata libseccomp libncursesw libpanelw ncurses-terminfo-base
@@ -103,12 +102,12 @@ apk del dhcpcd dhcpcd-openrc
 # Clear cache
 rm -rf /var/cache/apk/*
 
-echo "4. Service Cleanup"
+echo "4. service cleanup"
 rc-update del acpid boot || true
 rc-update del hwclock boot || true
 rc-update del swap boot || true
 
-echo "5. System Tuning"
+echo "5. system tuning"
 
 # Suppress IPv6 sysctl errors since it's disabled in the kernel
 sed -i '/net\.ipv6/s/^/# /' /usr/lib/sysctl.d/00-alpine.conf
@@ -150,10 +149,7 @@ chmod +x /etc/local.d/readahead.start
 rc-update add local default
 
 echo ""
-echo "minimal alpine script complete"
-echo "-------------------------------------------"
-echo "the tutorial switched openSSH for dropbear"
-echo "I am more comfortable with openSSH and it's"
-echo "worth the extra 5MB to me"
+echo "alpine-minimal.sh complete"
+echo "reboot to apply all kernel and service changes"
 
 # May need to alter this if I'm using IPv6

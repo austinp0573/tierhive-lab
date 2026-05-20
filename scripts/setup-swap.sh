@@ -1,37 +1,40 @@
 #!/bin/sh
 
-# setup swap
-# change SWAP_SIZE_MB to alter the size of the swap
+# setup a swapfile
+# dd is used instead of fallocate to avoid fragmentation issues on ext4
 
 set -eu
 
-SWAP_PATH="/swapfile"
-SWAP_SIZE_MB=512
+if [ "$(id -u)" -ne 0 ]; then
+    echo "must be run as root"
+    exit 1
+fi
 
-echo "creating a $SWAP_SIZE_MB MB allocated swap file at $SWAP_PATH"
-# dd is used as fallocate can cause fragmentation issues on certain filesystems like btrfs/ext4 on Alpine
+SWAP_PATH="/swapfile"
+
+printf "swap size in MB [default: 512]: "
+read -r SWAP_SIZE_MB
+SWAP_SIZE_MB="${SWAP_SIZE_MB:-512}"
+
+echo "creating ${SWAP_SIZE_MB}MB swapfile at ${SWAP_PATH}..."
 dd if=/dev/zero of="$SWAP_PATH" bs=1M count="$SWAP_SIZE_MB"
 chmod 600 "$SWAP_PATH"
 
-echo "setting up swap space"
+echo "formatting swap space"
 mkswap "$SWAP_PATH"
 
-echo "enabling swap file"
+echo "activating swap"
 swapon "$SWAP_PATH"
 
-echo "configuring permanent swap in /etc/fstab"
+echo "adding to /etc/fstab for persistence"
 if ! grep -q "$SWAP_PATH" /etc/fstab; then
     echo "$SWAP_PATH none swap sw 0 0" >> /etc/fstab
 fi
 
-echo "optimizing swappiness for low-RAM environment"
-
-# set swappiness to 10 to prefer keeping data in RAM, minimizing disk I/O
+echo "setting swappiness to 10 (prefer ram, minimize disk i/o)..."
 echo "vm.swappiness=10" > /etc/sysctl.d/swap.conf
 sysctl -p /etc/sysctl.d/swap.conf
 
 echo ""
-echo "swap configuration complete"
-echo "---------------------------"
-
+echo "swap configured: ${SWAP_SIZE_MB}MB at ${SWAP_PATH}"
 free -h

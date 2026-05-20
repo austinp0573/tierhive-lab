@@ -1,24 +1,53 @@
 #!/bin/sh
 
-# https://wiki.alpinelinux.org/wiki/Zram
-# configure zram
-# change any of the given variables as necessary
-# lz4 requires the smallest amount of CPU
-# effort and is not bad in terms of compression ratio
-# https://linuxreviews.org/Comparison_of_Compression_Algorithms#zram_block_drive_compression
-# https://imgur.com/EDLZNUZ
+# configure zram compressed swap in ram
+# lz4 = fastest with good ratio (recommended for low-ram vps)
+# lzo  = slightly better compression, slightly more cpu
+# zstd = best compression, most cpu
+# see: https://linuxreviews.org/Comparison_of_Compression_Algorithms#zram_block_drive_compression
 
-apk add --no-cache zram-init
+set -e
 
-cat > /etc/conf.d/zram-init << 'EOF'
+if [ "$(id -u)" -ne 0 ]; then
+    echo "must be run as root"
+    exit 1
+fi
+
+apk add zram-init
+
+echo ""
+echo "zram compression algorithm options:"
+echo "  lz4   - fastest, good compression ratio (recommended)"
+echo "  lzo   - balanced"
+echo "  zstd  - best compression, more cpu"
+echo ""
+printf "algorithm [default: lz4]: "
+read -r ALGO
+ALGO="${ALGO:-lz4}"
+
+# default to 50% of ram - zram still needs room to operate in the ram it compresses into
+MEM_MB=$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)
+DEFAULT_SIZE=$((MEM_MB / 2))
+
+echo ""
+printf "zram size in MB [default: %s, half of %sMB ram]: " "$DEFAULT_SIZE" "$MEM_MB"
+read -r SIZE
+SIZE="${SIZE:-$DEFAULT_SIZE}"
+
+cat > /etc/conf.d/zram-init << EOF
 load_on_start="yes"
 unload_on_stop="yes"
 num_devices="1"
 type0="swap"
-size0="256"
-algo0="lz4"
+size0="$SIZE"
+algo0="$ALGO"
 priority0="100"
 EOF
 
 rc-update add zram-init boot
 rc-service zram-init start
+
+echo ""
+echo "zram configured: ${SIZE}MB using ${ALGO} compression"
+cat /proc/swaps
+free -h
