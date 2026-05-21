@@ -53,8 +53,8 @@ adduser "$NEW_USER" wheel
 
 echo "configuring doas for wheel group..."
 mkdir -p /etc/doas.d
-echo "permit nopass :wheel" > /etc/doas.d/wheel.conf
-chmod 600 /etc/doas.d/wheel.conf
+echo "permit persist :wheel" > /etc/doas.d/wheel.conf
+chmod 640 /etc/doas.d/wheel.conf
 
 # ssh keys
 

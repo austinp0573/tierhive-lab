@@ -66,7 +66,6 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 export EDITOR=vi
 export PAGER=less
 
-# root-only: make shutdown feel natural
 alias shutdown='halt'
 EOF
 
