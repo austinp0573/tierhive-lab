@@ -1,0 +1,87 @@
+# tierhive base image - buildroot defconfig
+# x86_64 minimal vps image: busybox init, dropbear ssh, musl libc, grub2
+#
+# build with:
+#   make base        (from the buildroot/ directory of this repo)
+#
+# to change the root password before building:
+#   make menuconfig  -> system configuration -> root password
+#
+# note: BR2_TARGET_GENERIC_ROOT_PASSWD below is a development default.
+# disable or replace it before any real deployment.
+
+# architecture
+
+BR2_x86_64=y
+
+# musl is substantially smaller than glibc and has no nss framework
+# threads are enabled because dropbear requires them
+
+BR2_TOOLCHAIN_BUILDROOT_MUSL=y
+BR2_TOOLCHAIN_BUILDROOT_THREADS=y
+BR2_OPTIMIZE_S=y
+BR2_STRIP_strip=y
+
+# system configuration
+
+BR2_TARGET_GENERIC_HOSTNAME="tierhive"
+BR2_TARGET_GENERIC_ISSUE="tierhive"
+
+# development root password - disable after initial access is confirmed
+BR2_TARGET_GENERIC_ROOT_PASSWD="tierhive"
+
+# console on ttyS0 (serial) for vps out-of-band console access
+BR2_TARGET_GENERIC_GETTY_PORT="ttyS0"
+BR2_TARGET_GENERIC_GETTY_BAUDRATE_115200=y
+
+# use kernel devtmpfs for /dev - simplest option, correct for vps
+BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_DEVTMPFS=y
+
+# rootfs overlay and build hooks
+# overlay: files copied verbatim into target rootfs (init scripts, config, etc.)
+# post_build.sh: permission fixups after rootfs is assembled
+# post_image.sh: disk image assembly using genimage (see board/tierhive/base/)
+
+BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/rootfs_overlay"
+BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/post_build.sh"
+BR2_ROOTFS_POST_IMAGE_SCRIPT="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/post_image.sh"
+
+# kernel 
+# 6.6 lts series. config is stripped for a virtualized x86_64 environment.
+# see board/tierhive/base/linux.config for what was removed and why.
+
+BR2_LINUX_KERNEL=y
+BR2_LINUX_KERNEL_VERSION="6.6.31"
+BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
+BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/linux.config"
+
+# packages 
+
+# busybox: init, shell, and core utilities in one binary.
+# a custom busybox.config controlling applet selection will be added
+# in a subsequent commit. for now uses busybox's default config.
+BR2_PACKAGE_BUSYBOX=y
+
+# dropbear: lightweight ssh server (~110kb vs openssh ~1mb+).
+# server only; the client (dbclient) is not needed on deployed systems.
+BR2_PACKAGE_DROPBEAR=y
+BR2_PACKAGE_DROPBEAR_DISABLE_REVERSEDNS=y
+
+# genimage is a host-side tool used by post_image.sh to assemble
+# the bootable disk image from rootfs.ext4 + grub2 + bzImage.
+BR2_PACKAGE_HOST_GENIMAGE=y
+
+# root filesystem
+# ext4, 256mb. this is the deployed rootfs size.
+# the disk image itself will be slightly larger (boot partition + mbr).
+
+BR2_TARGET_ROOTFS_EXT2=y
+BR2_TARGET_ROOTFS_EXT2_4=y
+BR2_TARGET_ROOTFS_EXT2_SIZE="256M"
+
+# bootloader
+# grub2 in bios/mbr mode for broadest vps provider compatibility.
+# uefi is not selected; most kvm-based vps providers default to bios.
+
+BR2_TARGET_GRUB2=y
+BR2_TARGET_GRUB2_X86_BIOS=y
