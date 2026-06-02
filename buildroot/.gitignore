@@ -1,0 +1,7 @@
+# buildroot source is fetched at build time, not committed
+buildroot-src/
+
+# build output
+output/
+
+docs/

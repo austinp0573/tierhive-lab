@@ -1,0 +1,4 @@
+# package Config.in for the tierhive external tree.
+# no custom packages exist yet.
+# when adding a service package, source its Config.in here, e.g.:
+#   source "$BR2_EXTERNAL_TIERHIVE_PATH/package/frp/Config.in"
