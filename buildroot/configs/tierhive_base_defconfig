@@ -46,14 +46,14 @@ BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/rootfs_ove
 BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/post_build.sh"
 BR2_ROOTFS_POST_IMAGE_SCRIPT="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/post_image.sh"
 
-# kernel 
-# 6.6 lts series. config is stripped for a virtualized x86_64 environment.
-# see board/tierhive/base/linux.config for what was removed and why.
-
+# kernel - 6.6 lts, stripped for kvm/virtio vps environment
+# starts from the upstream x86_64_defconfig, then applies fragment
+# the fragment only documents changes see board/tierhive/base/linux.config.
 BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_VERSION="6.6.31"
-BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
-BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/linux.config"
+BR2_LINUX_KERNEL_USE_DEFCONFIG=y
+BR2_LINUX_KERNEL_DEFCONFIG="x86_64"
+BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/linux.config"
 
 # packages 
 
