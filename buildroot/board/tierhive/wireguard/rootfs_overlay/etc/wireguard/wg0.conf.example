@@ -1,0 +1,20 @@
+# /etc/wireguard/wg0.conf
+# wireguard interface configuration - loaded by S10wireguard via 'wg setconf'
+#
+# note: this is the raw wireguard config format, NOT the wg-quick format.
+# wg-quick fields like Address, DNS, PostUp, PostDown are not used here.
+# the interface ip address is in /etc/wireguard/address (one line: x.x.x.x/nn)
+#
+# generate keys on the deployed system (do not commit keys to git):
+#   wg genkey | tee /etc/wireguard/private.key | wg pubkey > /etc/wireguard/public.key
+#   chmod 600 /etc/wireguard/private.key
+
+[Interface]
+ListenPort = 51820
+PrivateKey = REPLACE_WITH_OUTPUT_OF_WG_GENKEY
+
+# add one [Peer] block per client
+# [Peer]
+# PublicKey = REPLACE_WITH_PEER_PUBLIC_KEY
+# AllowedIPs = 10.0.0.2/32
+# PersistentKeepalive = 25

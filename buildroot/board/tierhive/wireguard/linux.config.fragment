@@ -1,0 +1,17 @@
+# wireguard kernel config fragment
+# applied after board/tierhive/base/linux.config for the wireguard image
+#
+# the base fragment already includes:
+#   CONFIG_TUN=y         (required by wireguard)
+#   CONFIG_NETFILTER=y   (required by wireguard)
+#   CONFIG_MODULES=y     (allows wireguard to be loaded as a module)
+
+# wireguard as a loadable kernel module.
+# loaded at boot by S10wireguard via modprobe.
+CONFIG_WIREGUARD=m
+
+# udp tunnel infrastructure required by wireguard
+CONFIG_NET_UDP_TUNNEL=y
+
+# ip set support (useful for wireguard firewall rules, optional)
+# CONFIG_IP_SET is not set

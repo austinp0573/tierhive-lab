@@ -1,0 +1,54 @@
+#!/bin/sh
+# S10wireguard - start/stop wireguard vpn interface
+#
+# uses 'wg setconf' (not wg-quick) to avoid the bash dependency.
+# the interface ip address is set separately via 'ip addr add'.
+#
+# keys are never baked into the image.
+# generate keys on the deployed system:
+#   wg genkey | tee /etc/wireguard/private.key | wg pubkey > /etc/wireguard/public.key
+#   chmod 600 /etc/wireguard/private.key
+# then fill in /etc/wireguard/wg0.conf before starting this service.
+
+IFACE="wg0"
+CONF="/etc/wireguard/${IFACE}.conf"
+ADDR_FILE="/etc/wireguard/address"
+
+case "$1" in
+    start)
+        if [ ! -f "${CONF}" ]; then
+            echo "wireguard: ${CONF} not found, skipping"
+            exit 0
+        fi
+
+        echo "starting wireguard (${IFACE})..."
+
+        # ensure the module is loaded (it may autoload, but be explicit)
+        modprobe wireguard 2>/dev/null || true
+
+        # create the wireguard interface
+        ip link add dev "${IFACE}" type wireguard
+
+        # apply the wireguard configuration (keys, peers, listen port)
+        wg setconf "${IFACE}" "${CONF}"
+
+        # assign the interface ip address from /etc/wireguard/address
+        # this file should contain a single line like: 10.0.0.1/24
+        if [ -f "${ADDR_FILE}" ]; then
+            ip addr add "$(cat "${ADDR_FILE}")" dev "${IFACE}"
+        else
+            echo "wireguard: warning: ${ADDR_FILE} not found, no address assigned"
+        fi
+
+        ip link set up dev "${IFACE}"
+        echo "wireguard: ${IFACE} is up"
+        ;;
+    stop)
+        echo "stopping wireguard (${IFACE})..."
+        ip link del dev "${IFACE}" 2>/dev/null || true
+        ;;
+    *)
+        echo "usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac

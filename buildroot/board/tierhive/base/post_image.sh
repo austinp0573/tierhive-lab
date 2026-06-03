@@ -22,7 +22,8 @@
 set -e
 
 BINARIES="${BINARIES_DIR}"
-IMG="${BINARIES}/tierhive-base.img"
+IMG_NAME="tierhive-$(basename "$(dirname "${BINARIES_DIR}")").img"
+IMG="${BINARIES}/${IMG_NAME}"
 ROOTFS="${BINARIES}/rootfs.ext4"
 
 # buildroot places grub2 bios files here when BR2_TARGET_GRUB2_X86_BIOS=y

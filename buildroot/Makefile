@@ -36,9 +36,29 @@ fetch:
 # build the base vps image
 base: fetch
 	mkdir -p $(OUTPUT_DIR)/base
-	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/base \
-		BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_base_defconfig
+	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/base BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_base_defconfig
 	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/base
+
+# build the wireguard vps image (base + wireguard kernel module + wireguard-tools)
+wireguard: fetch
+	mkdir -p $(OUTPUT_DIR)/wireguard
+	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/wireguard \
+		BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_wireguard_defconfig
+	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/wireguard
+
+# future service targets follow the same pattern:
+#
+#   frp: fetch
+#       mkdir -p $(OUTPUT_DIR)/frp
+#       $(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/frp \
+#           BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_frp_defconfig
+#       $(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/frp
+#
+#   nginx: fetch
+#       mkdir -p $(OUTPUT_DIR)/nginx
+#       $(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/nginx \
+#           BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_nginx_defconfig
+#       $(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/nginx
 
 # open buildroot menuconfig for the base target
 menuconfig: fetch

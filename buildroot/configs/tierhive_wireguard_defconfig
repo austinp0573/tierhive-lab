@@ -1,0 +1,60 @@
+# tierhive wireguard image - buildroot defconfig
+# extends the base image with wireguard vpn server support
+#
+# build with:
+#   make wireguard   (from the buildroot/ directory of this repo)
+#
+# note: this defconfig is a copy of tierhive_base_defconfig with wireguard
+# additions. if the base defconfig changes significantly, review those changes
+# here as well. buildroot has no native defconfig inheritance mechanism.
+
+# same as base
+
+BR2_x86_64=y
+
+BR2_TOOLCHAIN_BUILDROOT_MUSL=y
+BR2_TOOLCHAIN_BUILDROOT_THREADS=y
+BR2_OPTIMIZE_S=y
+BR2_STRIP_strip=y
+
+BR2_TARGET_GENERIC_HOSTNAME="tierhive-wg"
+BR2_TARGET_GENERIC_ISSUE="tierhive-wg"
+BR2_TARGET_GENERIC_ROOT_PASSWD="tierhive"
+BR2_TARGET_GENERIC_GETTY_PORT="ttyS0"
+BR2_TARGET_GENERIC_GETTY_BAUDRATE_115200=y
+BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_DEVTMPFS=y
+
+# overlay: base provides core init scripts; wireguard overlay adds wg init + config
+BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/rootfs_overlay $(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/wireguard/rootfs_overlay"
+BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/post_build.sh"
+BR2_ROOTFS_POST_IMAGE_SCRIPT="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/post_image.sh"
+
+BR2_LINUX_KERNEL=y
+BR2_LINUX_KERNEL_VERSION="6.6.31"
+BR2_LINUX_KERNEL_USE_DEFCONFIG=y
+BR2_LINUX_KERNEL_DEFCONFIG="x86_64"
+# wireguard kernel fragment adds CONFIG_WIREGUARD=m on top of the base fragment
+BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/linux.config $(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/wireguard/linux.config.fragment"
+
+BR2_PACKAGE_BUSYBOX=y
+BR2_PACKAGE_BUSYBOX_CONFIG="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/busybox.config"
+
+BR2_PACKAGE_DROPBEAR=y
+BR2_PACKAGE_DROPBEAR_DISABLE_REVERSEDNS=y
+
+BR2_TARGET_ROOTFS_EXT2=y
+BR2_TARGET_ROOTFS_EXT2_4=y
+BR2_TARGET_ROOTFS_EXT2_SIZE="256M"
+
+BR2_TARGET_GRUB2=y
+BR2_TARGET_GRUB2_X86_BIOS=y
+
+# --- wireguard additions ---
+
+# iproute2: needed for 'ip link add dev wg0 type wireguard'.
+# busybox's ip applet does not support creating wireguard interface types.
+BR2_PACKAGE_IPROUTE2=y
+
+# wireguard-tools provides the 'wg' command for key generation and setconf.
+# keys are never baked into the image; they are generated on the deployed system.
+BR2_PACKAGE_WIREGUARD_TOOLS=y
