@@ -67,10 +67,6 @@ BR2_PACKAGE_BUSYBOX=y
 BR2_PACKAGE_DROPBEAR=y
 BR2_PACKAGE_DROPBEAR_DISABLE_REVERSEDNS=y
 
-# genimage is a host-side tool used by post_image.sh to assemble
-# the bootable disk image from rootfs.ext4 + grub2 + bzImage.
-BR2_PACKAGE_HOST_GENIMAGE=y
-
 # root filesystem
 # ext4, 256mb. this is the deployed rootfs size.
 # the disk image itself will be slightly larger (boot partition + mbr).
