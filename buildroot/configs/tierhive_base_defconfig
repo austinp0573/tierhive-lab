@@ -55,12 +55,12 @@ BR2_LINUX_KERNEL_USE_DEFCONFIG=y
 BR2_LINUX_KERNEL_DEFCONFIG="x86_64"
 BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/linux.config"
 
-# packages 
+# packages
 
 # busybox: init, shell, and core utilities in one binary.
-# a custom busybox.config controlling applet selection will be added
-# in a subsequent commit. for now uses busybox's default config.
+# custom applet selection - see board/tierhive/base/busybox.config.
 BR2_PACKAGE_BUSYBOX=y
+BR2_PACKAGE_BUSYBOX_CONFIG="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/busybox.config"
 
 # dropbear: lightweight ssh server (~110kb vs openssh ~1mb+).
 # server only; the client (dbclient) is not needed on deployed systems.
