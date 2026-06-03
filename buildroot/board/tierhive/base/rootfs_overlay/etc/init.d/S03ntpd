@@ -1,0 +1,23 @@
+#!/bin/sh
+# S03ntpd - start busybox ntpd for clock synchronization
+#
+# vps requires ntp. ssh certificate validation and log timestamps
+# both depend on a reasonably accurate clock.
+# -p: peer (ntp server). pool.ntp.org resolves to multiple servers.
+
+NTP_PEER="pool.ntp.org"
+
+case "$1" in
+    start)
+        echo "starting ntpd..."
+        /usr/sbin/ntpd -p "$NTP_PEER"
+        ;;
+    stop)
+        echo "stopping ntpd..."
+        killall ntpd 2>/dev/null
+        ;;
+    *)
+        echo "usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac

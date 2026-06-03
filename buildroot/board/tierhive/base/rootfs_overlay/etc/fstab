@@ -1,0 +1,9 @@
+# tierhive fstab
+# the root filesystem (/) is mounted by the kernel from the disk image.
+# this file handles virtual filesystems only
+
+proc      /proc    proc     defaults                    0 0
+sysfs     /sys     sysfs    defaults                    0 0
+devpts    /dev/pts devpts   mode=0620,gid=5             0 0
+tmpfs     /tmp     tmpfs    mode=1777,nosuid,nodev      0 0
+tmpfs     /run     tmpfs    mode=0755,nosuid,nodev      0 0

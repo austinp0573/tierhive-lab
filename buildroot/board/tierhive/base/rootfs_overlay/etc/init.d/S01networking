@@ -1,0 +1,21 @@
+#!/bin/sh
+# S01networking - bring up network interfaces via /etc/network/interfaces
+#
+# note: the grub kernel command line must include net.ifnames=0 biosdevname=0
+# to ensure the virtio nic is named eth0
+# see board/tierhive/base/grub.cfg.
+
+case "$1" in
+    start)
+        echo "starting networking..."
+        /sbin/ifup -a
+        ;;
+    stop)
+        echo "stopping networking..."
+        /sbin/ifdown -a
+        ;;
+    *)
+        echo "usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac

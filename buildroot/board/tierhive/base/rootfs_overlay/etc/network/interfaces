@@ -1,0 +1,18 @@
+# /etc/network/interfaces
+# static ip configuration for the vps
+#
+# edit address, netmask, and gateway to match your vps provider's assignment
+# before building the image, or update the deployed system directly.
+#
+# the interface is named eth0 because the grub kernel command line includes
+# net.ifnames=0 biosdevname=0. if you remove those flags, the virtio nic
+# will get a predictable name like ens3 instead.
+
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+    address 192.168.1.100
+    netmask 255.255.255.0
+    gateway 192.168.1.1

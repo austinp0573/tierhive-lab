@@ -1,0 +1,22 @@
+#!/bin/sh
+# S02syslog - start syslogd and klogd for basic system logging
+#
+# -C 64: circular in-memory buffer (64kb). no log files written to disk.
+# klogd ships kernel messages into syslog.
+
+case "$1" in
+    start)
+        echo "starting syslog..."
+        /sbin/syslogd -C 64
+        /sbin/klogd
+        ;;
+    stop)
+        echo "stopping syslog..."
+        killall syslogd 2>/dev/null
+        killall klogd 2>/dev/null
+        ;;
+    *)
+        echo "usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac

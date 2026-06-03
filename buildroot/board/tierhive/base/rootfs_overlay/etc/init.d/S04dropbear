@@ -1,0 +1,24 @@
+#!/bin/sh
+# S04dropbear - start dropbear ssh server
+#
+# -R: generate host keys at runtime if /etc/dropbear/ keys do not exist.
+#     this is the correct behavior for a deployed disk image. every instance
+#     gets unique host keys rather than sharing keys baked into the image.
+#
+# password authentication is enabled by default (busybox login handles it).
+# to disable password auth after key-based access is confirmed, add -s here.
+
+case "$1" in
+    start)
+        echo "starting ssh..."
+        /usr/sbin/dropbear -R
+        ;;
+    stop)
+        echo "stopping ssh..."
+        killall dropbear 2>/dev/null
+        ;;
+    *)
+        echo "usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac

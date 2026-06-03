@@ -1,0 +1,25 @@
+# tierhive inittab
+# busybox init process table
+#
+# boot sequence:
+#   1. mount virtual filesystems
+#   2. run S## scripts in /etc/init.d (networking, syslog, ntpd, ssh)
+#   3. spawn console login on ttyS0
+
+# mount /proc, /sys, /dev/pts, /tmp, /run via fstab
+::sysinit:/bin/mount -a
+
+# run all S## init scripts
+::sysinit:/etc/init.d/rcS
+
+# console login on ttyS0 (vps serial out-of-band console)
+# respawn: restarted automatically if the session exits
+ttyS0::respawn:/sbin/getty -L ttyS0 115200 vt100
+
+# ctrl+alt+del from the vps console triggers a clean reboot
+::ctrlaltdel:/sbin/reboot
+
+# graceful shutdown: stop services, then unmount
+# -r on umount falls back to remounting read-only if unmount fails
+::shutdown:/etc/init.d/rcK
+::shutdown:/bin/umount -a -r
