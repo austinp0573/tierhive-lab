@@ -1,4 +1,5 @@
 #!/bin/sh
+# description: disable password auth when ssh keys are present
 set -e
 
 if [ ! -s /root/.ssh/authorized_keys ]; then

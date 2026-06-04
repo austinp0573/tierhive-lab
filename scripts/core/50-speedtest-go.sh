@@ -1,4 +1,5 @@
 #!/bin/sh
+# description: install speedtest-go if missing
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"

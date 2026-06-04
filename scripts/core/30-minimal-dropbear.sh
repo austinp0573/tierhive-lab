@@ -1,4 +1,5 @@
 #!/bin/sh
+# description: strip alpine down and switch ssh to dropbear
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"

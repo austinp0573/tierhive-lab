@@ -1,4 +1,5 @@
 #!/bin/sh
+# description: print os, virtual hardware, services, and modules
 set -e
 
 echo "operating system"

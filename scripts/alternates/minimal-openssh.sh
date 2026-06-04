@@ -1,4 +1,5 @@
 #!/bin/sh
+# description: run the minimal setup while keeping openssh
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"

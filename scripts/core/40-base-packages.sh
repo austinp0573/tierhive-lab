@@ -1,4 +1,5 @@
 #!/bin/sh
+# description: install small daily-use tools and set timezone
 set -e
 
 echo "installing base packages"

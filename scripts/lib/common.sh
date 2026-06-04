@@ -72,11 +72,27 @@ run_scripts_in_dir() {
     for script_path in "$scripts_dir"/*.sh; do
         [ -e "$script_path" ] || continue
         name=$(basename "$script_path")
+        script_description "$script_path"
 
         echo ""
-        echo "running $name"
+        if [ -n "$SCRIPT_DESCRIPTION" ]; then
+            echo "running $name - $SCRIPT_DESCRIPTION"
+        else
+            echo "running $name"
+        fi
         sh "$script_path"
     done
+}
+
+script_description() {
+    script_path="$1"
+    description=$(sed -n 's/^# description: //p' "$script_path" | sed -n '1p')
+
+    if [ -n "$description" ]; then
+        SCRIPT_DESCRIPTION="$description"
+    else
+        SCRIPT_DESCRIPTION=""
+    fi
 }
 
 offer_scripts_in_dir() {
@@ -85,8 +101,15 @@ offer_scripts_in_dir() {
     for script_path in "$scripts_dir"/*.sh; do
         [ -e "$script_path" ] || continue
         name=$(basename "$script_path")
+        script_description "$script_path"
 
-        if prompt_yes_no "run $name?" "n"; then
+        if [ -n "$SCRIPT_DESCRIPTION" ]; then
+            prompt="run $name ($SCRIPT_DESCRIPTION)?"
+        else
+            prompt="run $name?"
+        fi
+
+        if prompt_yes_no "$prompt" "n"; then
             echo ""
             sh "$script_path"
             echo ""
