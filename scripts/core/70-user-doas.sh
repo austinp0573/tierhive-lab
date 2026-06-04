@@ -1,7 +1,104 @@
 #!/bin/sh
 # description: create a non-root doas user
+# creates the user, adds them to wheel, configures doas, and optionally copies ssh keys
+
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-sh "$SCRIPT_DIR/non-doas-setup.sh"
+. "$SCRIPT_DIR/lib/common.sh"
+
+require_root
+
+echo "creating non-root user"
+
+printf "new username: "
+read -r NEW_USER
+
+if [ -z "$NEW_USER" ]; then
+    echo "no username entered, skipping user creation"
+    exit 0
+fi
+
+if id "$NEW_USER" > /dev/null 2>&1; then
+    echo "user $NEW_USER already exists, skipping"
+    exit 0
+fi
+
+while :; do
+    read_secret "password for ${NEW_USER}: "
+    NEW_PASS="$SECRET_RESULT"
+
+    if [ -z "$NEW_PASS" ]; then
+        echo "no password entered, aborting"
+        exit 1
+    fi
+
+    read_secret "confirm password for ${NEW_USER}: "
+    NEW_PASS_CONFIRM="$SECRET_RESULT"
+
+    if [ "$NEW_PASS" = "$NEW_PASS_CONFIRM" ]; then
+        break
+    fi
+
+    echo "passwords did not match, try again"
+done
+
+echo "creating user $NEW_USER..."
+adduser -D -s /bin/ash "$NEW_USER"
+printf "%s:%s\n" "$NEW_USER" "$NEW_PASS" | chpasswd
+
+echo "adding $NEW_USER to wheel group..."
+adduser "$NEW_USER" wheel
+
+echo "configuring doas for wheel group..."
+mkdir -p /etc/doas.d
+echo "permit persist :wheel" > /etc/doas.d/wheel.conf
+chmod 640 /etc/doas.d/wheel.conf
+
+USER_HOME="/home/$NEW_USER"
+
+if prompt_yes_no "copy /root/.ssh/authorized_keys to ${NEW_USER}?" "y"; then
+    COPIED_KEYS=0
+    if [ -s /root/.ssh/authorized_keys ]; then
+        mkdir -p "$USER_HOME/.ssh"
+        cp /root/.ssh/authorized_keys "$USER_HOME/.ssh/authorized_keys"
+        chown -R "${NEW_USER}:${NEW_USER}" "$USER_HOME/.ssh"
+        chmod 700 "$USER_HOME/.ssh"
+        chmod 600 "$USER_HOME/.ssh/authorized_keys"
+        echo "ssh keys copied to $USER_HOME/.ssh/authorized_keys"
+        COPIED_KEYS=1
+    else
+        echo "no authorized_keys found in /root/.ssh/, skipping"
+    fi
+else
+    COPIED_KEYS=0
+fi
+
+# ash-compatible; profile.d handles aliases/prompt/welcome globally so only user-specific overrides here
+cat > "$USER_HOME/.profile" << 'EOF'
+export EDITOR=vi
+export PAGER=less
+
+if [ -d "$HOME/bin" ]; then
+    export PATH="$HOME/bin:$PATH"
+fi
+EOF
+
+# sources global aliases so they work in non-login interactive shells too
+# alpine's /etc/profile sets ENV=~/.ashrc for interactive non-login shells
+cat > "$USER_HOME/.ashrc" << 'EOF'
+[ -f /etc/profile.d/10-aliases.sh ] && . /etc/profile.d/10-aliases.sh
+EOF
+
+chown "${NEW_USER}:${NEW_USER}" "$USER_HOME/.profile" "$USER_HOME/.ashrc"
+chmod 644 "$USER_HOME/.profile" "$USER_HOME/.ashrc"
+
+echo ""
+echo "user $NEW_USER created"
+echo "  shell:  /bin/ash"
+echo "  groups: $(id -Gn "$NEW_USER")"
+echo "  doas:   permit persist :wheel"
+if [ "$COPIED_KEYS" -eq 1 ]; then
+    echo "  ssh:    keys copied from root"
+fi

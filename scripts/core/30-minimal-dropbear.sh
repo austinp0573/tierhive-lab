@@ -4,5 +4,27 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-sh "$SCRIPT_DIR/alpine-minimal-dropbear.sh"
+if [ "$(id -u)" -ne 0 ]; then
+    echo "must be run as root"
+    exit 1
+fi
+
+# install dropbear and swap the service registration before removing other packages
+apk add dropbear
+rc-update del sshd default
+rc-update add dropbear default
+
+sh "$SCRIPT_DIR/lib/alpine-minimal-base.sh"
+
+# remove openssh last
+# removing it over an active ssh session can drop the connection
+apk del openssh openssh-client-common openssh-client-default openssh-keygen openssh-server \
+    openssh-server-common openssh-server-common-openrc openssh-server-pam openssh-sftp-server || true
+rm -rf /var/cache/apk/*
+
+# start dropbear now so the session survives if sshd was the active daemon
 rc-service dropbear start 2>/dev/null || true
+
+echo ""
+echo "alpine minimalization complete"
+echo "reboot to apply kernel and service changes"
