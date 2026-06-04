@@ -41,14 +41,14 @@ BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/rootfs_ove
 BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/post_build.sh"
 BR2_ROOTFS_POST_IMAGE_SCRIPT="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/post_image.sh"
 
-# kernel - 6.6 lts, stripped for kvm/virtio vps environment
-# starts from the upstream x86_64_defconfig, then applies fragment
-# the fragment only documents changes see board/tierhive/base/linux.config.
+# kernel 6.6 lts
+# full custom config for kvm/virtio vps
+# see board/tierhive/base/linux.config
 BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_VERSION="6.6.31"
-BR2_LINUX_KERNEL_USE_DEFCONFIG=y
-BR2_LINUX_KERNEL_DEFCONFIG="x86_64"
-BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/linux.config"
+BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
+BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/linux.config"
+BR2_LINUX_KERNEL_INSTALL_TARGET=y
 
 # packages
 
@@ -57,10 +57,12 @@ BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tier
 BR2_PACKAGE_BUSYBOX=y
 BR2_PACKAGE_BUSYBOX_CONFIG="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/busybox.config"
 
-# dropbear: lightweight ssh server (~110kb vs openssh ~1mb+).
-# server only; the client (dbclient) is not needed on deployed systems.
+# dropbear, server only
 BR2_PACKAGE_DROPBEAR=y
 BR2_PACKAGE_DROPBEAR_DISABLE_REVERSEDNS=y
+
+# host tools
+BR2_PACKAGE_HOST_E2FSPROGS=y
 
 # root filesystem
 # ext4, 256mb. this is the deployed rootfs size.
