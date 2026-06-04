@@ -6,11 +6,6 @@
 
 set -e
 
-# ensure dropbear host key directory exists with correct permissions
-# keys are generated at first boot by S04dropbear (dropbear -R)
-mkdir -p "${TARGET_DIR}/etc/dropbear"
-chmod 700 "${TARGET_DIR}/etc/dropbear"
-
 # /root/.ssh must be 700 for dropbear to accept authorized_keys
 mkdir -p "${TARGET_DIR}/root/.ssh"
 chmod 700 "${TARGET_DIR}/root/.ssh"
