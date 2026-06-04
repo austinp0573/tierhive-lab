@@ -6,12 +6,6 @@
 
 set -e
 
-# copy the kernel into the rootfs at /boot/bzImage
-# grub loads it from there at boot time. a separate /boot partition
-# is not needed - the root ext4 partition holds everything
-mkdir -p "${TARGET_DIR}/boot"
-cp "${BINARIES_DIR}/bzImage" "${TARGET_DIR}/boot/bzImage"
-
 # ensure dropbear host key directory exists with correct permissions
 # keys are generated at first boot by S04dropbear (dropbear -R)
 mkdir -p "${TARGET_DIR}/etc/dropbear"
