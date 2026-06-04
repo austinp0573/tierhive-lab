@@ -52,8 +52,9 @@ BR2_TARGET_ROOTFS_EXT2_4=y
 BR2_TARGET_ROOTFS_EXT2_SIZE="256M"
 
 BR2_TARGET_GRUB2=y
-BR2_TARGET_GRUB2_X86_BIOS=y
-
+BR2_TARGET_GRUB2_I386_PC=y
+BR2_TARGET_GRUB2_BUILTIN_MODULES_PC="ext2 part_msdos"
+BR2_TARGET_GRUB2_BUILTIN_CONFIG_PC="$(BR2_EXTERNAL_TIERHIVE_PATH)/board/tierhive/base/rootfs_overlay/boot/grub/grub.cfg"
 # --- wireguard additions ---
 
 # iproute2: needed for 'ip link add dev wg0 type wireguard'.

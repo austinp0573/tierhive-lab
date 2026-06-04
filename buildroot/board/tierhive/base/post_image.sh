@@ -25,10 +25,11 @@ IMG_NAME="tierhive-$(basename "$(dirname "${BINARIES_DIR}")").img"
 IMG="${BINARIES}/${IMG_NAME}"
 ROOTFS="${BINARIES}/rootfs.ext4"
 
-# buildroot names the grub2 bios images boot.img and grub.img.
-# search the output tree rather than hardcoding paths that vary by version.
-GRUB2_BOOT=$(find "${BINARIES}" -name "boot.img" 2>/dev/null | head -n 1)
+# buildroot generates grub.img in BINARIES_DIR, but boot.img remains in the build tree
+BUILD_DIR="$(dirname "${BINARIES_DIR}")/build"
+GRUB2_BOOT=$(find "${BUILD_DIR}" -path "*/grub2-*/build-*/grub-core/boot.img" 2>/dev/null | head -n 1)
 GRUB2_CORE=$(find "${BINARIES}" -name "grub.img" 2>/dev/null | head -n 1)
+
 
 for f in "${ROOTFS}" "${GRUB2_BOOT}" "${GRUB2_CORE}"; do
     if [ ! -f "${f}" ]; then
