@@ -1,11 +1,11 @@
 #!/bin/sh
 
-# interactively offers to run every .sh file in the scripts directory
-# skips itself so it doesn't recurse
+# interactively offers the optional scripts
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+OPTIONAL_DIR="$SCRIPT_DIR/optional"
 
 if [ "$(id -u)" -ne 0 ]; then
     echo "must be run as root"
@@ -13,14 +13,12 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 echo ""
-echo "available scripts in $SCRIPT_DIR:"
+echo "available optional scripts:"
 echo ""
 
-for script in "$SCRIPT_DIR"/*.sh; do
+for script in "$OPTIONAL_DIR"/*.sh; do
+    [ -e "$script" ] || continue
     name=$(basename "$script")
-
-    # skip this script
-    [ "$name" = "run-scripts.sh" ] && continue
 
     printf "run %s? [y/n, default: n]: " "$name"
     read -r run_it

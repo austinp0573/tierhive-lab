@@ -13,6 +13,12 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+if grep -q "^/dev/zram" /proc/swaps 2>/dev/null; then
+    echo "zram swap is already active"
+    cat /proc/swaps
+    exit 0
+fi
+
 apk add zram-init
 
 echo ""

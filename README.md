@@ -6,7 +6,7 @@ The original shell scripts still work and are useful for one-off setup. I am mov
 
 ## usage
 
-For the shell scripts, run `setup.sh` first on a fresh VPS. It runs core setup in order, prompts for values where needed, and offers any remaining scripts at the end. Individual scripts can also be run standalone. `run-scripts.sh` walks through everything in the directory interactively.
+For the shell scripts, run `setup.sh` first on a fresh VPS. It runs the numbered scripts in `scripts/core/` in order, then offers anything in `scripts/optional/`. Individual scripts can still be run standalone. `run-scripts.sh` only walks through the optional scripts.
 
 For Ansible, start in `ansible/`. The current playbook provisions WireGuard on Alpine Linux with nftables-based peer access controls. See `ansible/README.md` for the inventory layout and WireGuard variables.
 
@@ -25,7 +25,7 @@ For Ansible, start in `ansible/`. The current playbook provisions WireGuard on A
 | `speedtest-go-setup.sh` | installs speedtest-go |
 | `ipv6_and_net_optimization.sh` | network sysctl tuning scaled to available RAM, optional static IPv6 setup |
 | `set-hostname.sh` | renames the system hostname cleanly |
-| `run-scripts.sh` | walks through every script in the directory and asks if you want to run it |
+| `run-scripts.sh` | walks through optional scripts and asks if you want to run them |
 
 ## ansible
 
