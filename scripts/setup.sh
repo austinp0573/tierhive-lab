@@ -18,12 +18,7 @@ echo "tierhive vps setup"
 echo "=================="
 echo ""
 
-for script_path in "$CORE_DIR"/*.sh; do
-    name=$(basename "$script_path")
-    echo ""
-    echo "running $name"
-    sh "$script_path"
-done
+run_scripts_in_dir "$CORE_DIR"
 
 # done
 
@@ -40,17 +35,7 @@ RUN_OPTIONAL="${RUN_OPTIONAL:-n}"
 
 if [ "$RUN_OPTIONAL" = "y" ]; then
     echo ""
-    for script_path in "$OPTIONAL_DIR"/*.sh; do
-        [ -e "$script_path" ] || continue
-        name=$(basename "$script_path")
-        printf "run %s? [y/n, default: n]: " "$name"
-        read -r run_it
-        if [ "${run_it:-n}" = "y" ]; then
-            echo ""
-            sh "$script_path"
-            echo ""
-        fi
-    done
+    offer_scripts_in_dir "$OPTIONAL_DIR"
 fi
 
 echo ""
