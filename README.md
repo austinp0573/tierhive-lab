@@ -6,7 +6,7 @@ The original shell scripts still work and are useful for one-off setup. I am mov
 
 ## usage
 
-For the shell scripts, run `setup.sh` first on a fresh VPS. It runs the numbered scripts in `scripts/core/` in order, then offers anything in `scripts/optional/`. Individual scripts can still be run standalone. `run-scripts.sh` only walks through the optional scripts.
+For the shell scripts, run `setup.sh` first on a fresh VPS. It runs the numbered scripts in `scripts/core/` in order, then offers anything in `scripts/optional/`. Individual scripts can still be run standalone. `run-scripts.sh` walks through optional setup scripts, and `run-diagnostics.sh` walks through diagnostic checks.
 
 For Ansible, start in `ansible/`. The current playbook provisions WireGuard on Alpine Linux with nftables-based peer access controls. See `ansible/README.md` for the inventory layout and WireGuard variables.
 
@@ -27,7 +27,7 @@ scripts/core/
   80-ssh-hardening.sh
 ```
 
-Dropbear is the default because this repo is tuned for very small VPSs. The OpenSSH minimal path is still available through `scripts/optional/minimal-openssh.sh` if you want that tradeoff instead.
+Dropbear is the default because this repo is tuned for very small VPSs. The OpenSSH minimal path is still available through `scripts/alternates/minimal-openssh.sh` if you want that tradeoff instead.
 
 | script | what it does |
 |---|---|
@@ -43,6 +43,7 @@ Dropbear is the default because this repo is tuned for very small VPSs. The Open
 | `ipv6_and_net_optimization.sh` | network sysctl tuning scaled to available RAM, optional static IPv6 setup |
 | `set-hostname.sh` | renames the system hostname cleanly |
 | `run-scripts.sh` | walks through optional scripts and asks if you want to run them |
+| `run-diagnostics.sh` | walks through diagnostic scripts and asks if you want to run them |
 
 ## ansible
 

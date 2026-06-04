@@ -13,11 +13,23 @@ prompt_yes_no() {
     prompt="$1"
     default="${2:-n}"
 
-    printf "%s [y/n, default: %s]: " "$prompt" "$default"
-    read -r answer
-    answer="${answer:-$default}"
+    while :; do
+        printf "%s [y/n, default: %s]: " "$prompt" "$default"
+        read -r answer
+        answer="${answer:-$default}"
 
-    [ "$answer" = "y" ]
+        case "$answer" in
+            y|Y|yes|YES)
+                return 0
+                ;;
+            n|N|no|NO)
+                return 1
+                ;;
+            *)
+                echo "enter y or n"
+                ;;
+        esac
+    done
 }
 
 prompt_positive_int() {
