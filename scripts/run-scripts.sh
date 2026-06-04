@@ -7,10 +7,9 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 OPTIONAL_DIR="$SCRIPT_DIR/optional"
 
-if [ "$(id -u)" -ne 0 ]; then
-    echo "must be run as root"
-    exit 1
-fi
+. "$SCRIPT_DIR/lib/common.sh"
+
+require_root
 
 echo ""
 echo "available optional scripts:"

@@ -12,6 +12,23 @@ For Ansible, start in `ansible/`. The current playbook provisions WireGuard on A
 
 ## scripts
 
+The shell setup is split into a small entry point, numbered core scripts, and optional extras. Core scripts run in filename order, so the early memory steps stay predictable:
+
+```text
+scripts/core/
+  00-swap.sh
+  10-apk-update.sh
+  20-zram.sh
+  30-minimal-dropbear.sh
+  40-base-packages.sh
+  50-speedtest-go.sh
+  60-profile.sh
+  70-user-doas.sh
+  80-ssh-hardening.sh
+```
+
+Dropbear is the default because this repo is tuned for very small VPSs. The OpenSSH minimal path is still available through `scripts/optional/minimal-openssh.sh` if you want that tradeoff instead.
+
 | script | what it does |
 |---|---|
 | `setup.sh` | main setup — run this first on a fresh VPS |
