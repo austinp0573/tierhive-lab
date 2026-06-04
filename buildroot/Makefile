@@ -1,13 +1,16 @@
 # tierhive buildroot project
 #
 # usage:
-#   make base          build the minimal base vps image
-#   make fetch         download buildroot source only
-#   make menuconfig    open buildroot menuconfig (base target)
-#   make linux-menuconfig  open kernel menuconfig (base target)
-#   make saveconfig    write running config back to defconfig
-#   make clean         remove build output
-#   make distclean     remove output and downloaded buildroot source
+#   make base                  build the minimal base vps image
+#   make wireguard             build the wireguard vps image
+#   make fetch                 download buildroot source only
+#   make menuconfig            open buildroot menuconfig (base)
+#   make linux-menuconfig      open kernel menuconfig (base)
+#   make wireguard-menuconfig  open buildroot menuconfig (wireguard)
+#   make saveconfig            save base config back to defconfig
+#   make wireguard-saveconfig  save wireguard config back to defconfig
+#   make clean                 remove build output
+#   make distclean             remove output and downloaded buildroot source
 
 BUILDROOT_VERSION := 2024.02.9
 BUILDROOT_TARBALL := buildroot-$(BUILDROOT_VERSION).tar.gz
@@ -16,7 +19,8 @@ BUILDROOT_SRC     := $(CURDIR)/buildroot-src
 OUTPUT_DIR        := $(CURDIR)/output
 BR2_EXTERNAL      := $(CURDIR)
 
-.PHONY: all base fetch menuconfig linux-menuconfig saveconfig clean distclean help
+.PHONY: all base wireguard fetch menuconfig linux-menuconfig wireguard-menuconfig \
+        saveconfig wireguard-saveconfig clean distclean help
 
 all: base
 
@@ -36,17 +40,18 @@ fetch:
 # build the base vps image
 base: fetch
 	mkdir -p $(OUTPUT_DIR)/base
-	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/base BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_base_defconfig
+	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/base \
+		BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_base_defconfig
 	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/base
 
-# build the wireguard vps image (base + wireguard kernel module + wireguard-tools)
+# build the wireguard vps image
 wireguard: fetch
 	mkdir -p $(OUTPUT_DIR)/wireguard
 	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/wireguard \
 		BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_wireguard_defconfig
 	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/wireguard
 
-# future service targets follow the same pattern:
+# future service targets follow this same pattern:
 #
 #   frp: fetch
 #       mkdir -p $(OUTPUT_DIR)/frp
@@ -74,19 +79,24 @@ linux-menuconfig: fetch
 		BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_base_defconfig
 	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/base linux-menuconfig
 
-# save the running config back to our defconfig file
+# open buildroot menuconfig for the wireguard target
+wireguard-menuconfig: fetch
+	mkdir -p $(OUTPUT_DIR)/wireguard
+	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/wireguard \
+		BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_wireguard_defconfig
+	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/wireguard menuconfig
+
+# save the base config back to its defconfig file
 saveconfig: fetch
 	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/base \
 		BR2_EXTERNAL=$(BR2_EXTERNAL) savedefconfig \
 		BR2_DEFCONFIG=$(BR2_EXTERNAL)/configs/tierhive_base_defconfig
 
-# future service targets will follow this same pattern, for example:
-#
-#   wireguard: fetch
-#       mkdir -p $(OUTPUT_DIR)/wireguard
-#       $(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/wireguard \
-#           BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_wireguard_defconfig
-#       $(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/wireguard
+# save the wireguard config back to its defconfig file
+wireguard-saveconfig: fetch
+	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/wireguard \
+		BR2_EXTERNAL=$(BR2_EXTERNAL) savedefconfig \
+		BR2_DEFCONFIG=$(BR2_EXTERNAL)/configs/tierhive_wireguard_defconfig
 
 clean:
 	rm -rf $(OUTPUT_DIR)
@@ -98,11 +108,14 @@ help:
 	@echo ""
 	@echo "tierhive buildroot project"
 	@echo ""
-	@echo "  make base              build the base vps image"
-	@echo "  make fetch             download buildroot source only"
-	@echo "  make menuconfig        open buildroot menuconfig (base)"
-	@echo "  make linux-menuconfig  open kernel menuconfig (base)"
-	@echo "  make saveconfig        save config back to defconfig"
-	@echo "  make clean             remove output directory"
-	@echo "  make distclean         remove output and buildroot source"
+	@echo "  make base                  build the base vps image"
+	@echo "  make wireguard             build the wireguard vps image"
+	@echo "  make fetch                 download buildroot source only"
+	@echo "  make menuconfig            open buildroot menuconfig (base)"
+	@echo "  make linux-menuconfig      open kernel menuconfig (base)"
+	@echo "  make wireguard-menuconfig  open buildroot menuconfig (wireguard)"
+	@echo "  make saveconfig            save base config back to defconfig"
+	@echo "  make wireguard-saveconfig  save wireguard config back to defconfig"
+	@echo "  make clean                 remove output directory"
+	@echo "  make distclean             remove output and buildroot source"
 	@echo ""
