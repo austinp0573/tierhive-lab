@@ -12,6 +12,15 @@ fi
 
 SWAP_PATH="/swapfile"
 
+if grep -q "^[^ ]* $SWAP_PATH " /proc/swaps || grep -q "^$SWAP_PATH " /proc/swaps; then
+    echo "swap is already active at ${SWAP_PATH}"
+    free -h
+    exit 0
+fi
+
+if [ -f "$SWAP_PATH" ]; then
+    echo "using existing swapfile at ${SWAP_PATH}"
+else
 printf "swap size in MB [default: 512]: "
 read -r SWAP_SIZE_MB
 SWAP_SIZE_MB="${SWAP_SIZE_MB:-512}"
@@ -22,6 +31,7 @@ chmod 600 "$SWAP_PATH"
 
 echo "formatting swap space"
 mkswap "$SWAP_PATH"
+fi
 
 echo "activating swap"
 swapon "$SWAP_PATH"

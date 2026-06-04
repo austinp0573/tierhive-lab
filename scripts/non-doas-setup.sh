@@ -14,6 +14,17 @@ fi
 
 echo "creating non-root user"
 
+read_secret() {
+    prompt="$1"
+    old_stty="$(stty -g)"
+
+    printf "%s" "$prompt"
+    stty -echo
+    read -r SECRET_VALUE
+    stty "$old_stty"
+    echo ""
+}
+
 printf "new username: "
 read -r NEW_USER
 
@@ -29,16 +40,24 @@ fi
 
 # password
 
-printf "password for %s: " "$NEW_USER"
-stty -echo
-read -r NEW_PASS
-stty echo
-echo ""
+while :; do
+    read_secret "password for ${NEW_USER}: "
+    NEW_PASS="$SECRET_VALUE"
 
-if [ -z "$NEW_PASS" ]; then
-    echo "no password entered, aborting"
-    exit 1
-fi
+    if [ -z "$NEW_PASS" ]; then
+        echo "no password entered, aborting"
+        exit 1
+    fi
+
+    read_secret "confirm password for ${NEW_USER}: "
+    NEW_PASS_CONFIRM="$SECRET_VALUE"
+
+    if [ "$NEW_PASS" = "$NEW_PASS_CONFIRM" ]; then
+        break
+    fi
+
+    echo "passwords did not match, try again"
+done
 
 # create user
 
