@@ -19,9 +19,11 @@ read_secret() {
     old_stty="$(stty -g)"
 
     printf "%s" "$prompt"
+    trap 'stty "$old_stty"; echo ""; exit 1' INT TERM
     stty -echo
     read -r SECRET_VALUE
     stty "$old_stty"
+    trap - INT TERM
     echo ""
 }
 

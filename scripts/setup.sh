@@ -29,11 +29,7 @@ echo ""
 
 # optional scripts
 
-printf "run any additional scripts? [y/n, default: n]: "
-read -r RUN_OPTIONAL
-RUN_OPTIONAL="${RUN_OPTIONAL:-n}"
-
-if [ "$RUN_OPTIONAL" = "y" ]; then
+if prompt_yes_no "run any additional scripts?" "n"; then
     echo ""
     offer_scripts_in_dir "$OPTIONAL_DIR"
 fi
@@ -42,8 +38,6 @@ echo ""
 echo "all done."
 echo "a reboot is strongly recommended to apply all kernel and service changes."
 echo ""
-printf "reboot now? [y/n, default: n]: "
-read -r DO_REBOOT
-if [ "${DO_REBOOT:-n}" = "y" ]; then
+if prompt_yes_no "reboot now?" "n"; then
     reboot
 fi

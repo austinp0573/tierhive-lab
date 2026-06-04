@@ -9,6 +9,38 @@ require_root() {
     fi
 }
 
+prompt_yes_no() {
+    prompt="$1"
+    default="${2:-n}"
+
+    printf "%s [y/n, default: %s]: " "$prompt" "$default"
+    read -r answer
+    answer="${answer:-$default}"
+
+    [ "$answer" = "y" ]
+}
+
+prompt_positive_int() {
+    prompt="$1"
+    default="$2"
+
+    while :; do
+        printf "%s [default: %s]: " "$prompt" "$default"
+        read -r answer
+        answer="${answer:-$default}"
+
+        case "$answer" in
+            ''|*[!0-9]*|0)
+                echo "enter a positive number"
+                ;;
+            *)
+                PROMPT_RESULT="$answer"
+                return 0
+                ;;
+        esac
+    done
+}
+
 run_scripts_in_dir() {
     scripts_dir="$1"
 
@@ -29,10 +61,7 @@ offer_scripts_in_dir() {
         [ -e "$script_path" ] || continue
         name=$(basename "$script_path")
 
-        printf "run %s? [y/n, default: n]: " "$name"
-        read -r run_it
-
-        if [ "${run_it:-n}" = "y" ]; then
+        if prompt_yes_no "run $name?" "n"; then
             echo ""
             sh "$script_path"
             echo ""

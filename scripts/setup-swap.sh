@@ -5,6 +5,10 @@
 
 set -eu
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+. "$SCRIPT_DIR/lib/common.sh"
+
 if [ "$(id -u)" -ne 0 ]; then
     echo "must be run as root"
     exit 1
@@ -21,9 +25,8 @@ fi
 if [ -f "$SWAP_PATH" ]; then
     echo "using existing swapfile at ${SWAP_PATH}"
 else
-printf "swap size in MB [default: 512]: "
-read -r SWAP_SIZE_MB
-SWAP_SIZE_MB="${SWAP_SIZE_MB:-512}"
+prompt_positive_int "swap size in MB" "512"
+SWAP_SIZE_MB="$PROMPT_RESULT"
 
 echo "creating ${SWAP_SIZE_MB}MB swapfile at ${SWAP_PATH}..."
 dd if=/dev/zero of="$SWAP_PATH" bs=1M count="$SWAP_SIZE_MB"
@@ -46,5 +49,5 @@ echo "vm.swappiness=10" > /etc/sysctl.d/swap.conf
 sysctl -p /etc/sysctl.d/swap.conf
 
 echo ""
-echo "swap configured: ${SWAP_SIZE_MB}MB at ${SWAP_PATH}"
+echo "swap configured at ${SWAP_PATH}"
 free -h

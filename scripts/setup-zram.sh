@@ -8,10 +8,11 @@
 
 set -e
 
-if [ "$(id -u)" -ne 0 ]; then
-    echo "must be run as root"
-    exit 1
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+. "$SCRIPT_DIR/lib/common.sh"
+
+require_root
 
 if grep -q "^/dev/zram" /proc/swaps 2>/dev/null; then
     echo "zram swap is already active"
@@ -31,14 +32,22 @@ printf "algorithm [default: lz4]: "
 read -r ALGO
 ALGO="${ALGO:-lz4}"
 
+case "$ALGO" in
+    lz4|lzo|zstd)
+        ;;
+    *)
+        echo "unsupported zram algorithm: $ALGO"
+        exit 1
+        ;;
+esac
+
 # default to 50% of ram - zram still needs room to operate in the ram it compresses into
 MEM_MB=$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)
 DEFAULT_SIZE=$((MEM_MB / 2))
 
 echo ""
-printf "zram size in MB [default: %s, half of %sMB ram]: " "$DEFAULT_SIZE" "$MEM_MB"
-read -r SIZE
-SIZE="${SIZE:-$DEFAULT_SIZE}"
+prompt_positive_int "zram size in MB, half of ${MEM_MB}MB ram" "$DEFAULT_SIZE"
+SIZE="$PROMPT_RESULT"
 
 cat > /etc/conf.d/zram-init << EOF
 load_on_start="yes"
