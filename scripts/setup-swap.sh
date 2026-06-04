@@ -9,10 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 . "$SCRIPT_DIR/lib/common.sh"
 
-if [ "$(id -u)" -ne 0 ]; then
-    echo "must be run as root"
-    exit 1
-fi
+require_root
 
 SWAP_PATH="/swapfile"
 

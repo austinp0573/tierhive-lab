@@ -7,25 +7,13 @@
 
 set -e
 
-if [ "$(id -u)" -ne 0 ]; then
-    echo "must be run as root"
-    exit 1
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+. "$SCRIPT_DIR/lib/common.sh"
+
+require_root
 
 echo "creating non-root user"
-
-read_secret() {
-    prompt="$1"
-    old_stty="$(stty -g)"
-
-    printf "%s" "$prompt"
-    trap 'stty "$old_stty"; echo ""; exit 1' INT TERM
-    stty -echo
-    read -r SECRET_VALUE
-    stty "$old_stty"
-    trap - INT TERM
-    echo ""
-}
 
 printf "new username: "
 read -r NEW_USER
@@ -44,7 +32,7 @@ fi
 
 while :; do
     read_secret "password for ${NEW_USER}: "
-    NEW_PASS="$SECRET_VALUE"
+    NEW_PASS="$SECRET_RESULT"
 
     if [ -z "$NEW_PASS" ]; then
         echo "no password entered, aborting"
@@ -52,7 +40,7 @@ while :; do
     fi
 
     read_secret "confirm password for ${NEW_USER}: "
-    NEW_PASS_CONFIRM="$SECRET_VALUE"
+    NEW_PASS_CONFIRM="$SECRET_RESULT"
 
     if [ "$NEW_PASS" = "$NEW_PASS_CONFIRM" ]; then
         break
@@ -81,11 +69,8 @@ chmod 640 /etc/doas.d/wheel.conf
 
 USER_HOME="/home/$NEW_USER"
 
-printf "copy /root/.ssh/authorized_keys to %s? [y/n, default: y]: " "$NEW_USER"
-read -r COPY_KEYS
-COPY_KEYS="${COPY_KEYS:-y}"
-
-if [ "$COPY_KEYS" = "y" ]; then
+if prompt_yes_no "copy /root/.ssh/authorized_keys to ${NEW_USER}?" "y"; then
+    COPIED_KEYS=0
     if [ -s /root/.ssh/authorized_keys ]; then
         mkdir -p "$USER_HOME/.ssh"
         cp /root/.ssh/authorized_keys "$USER_HOME/.ssh/authorized_keys"
@@ -93,9 +78,12 @@ if [ "$COPY_KEYS" = "y" ]; then
         chmod 700 "$USER_HOME/.ssh"
         chmod 600 "$USER_HOME/.ssh/authorized_keys"
         echo "ssh keys copied to $USER_HOME/.ssh/authorized_keys"
+        COPIED_KEYS=1
     else
         echo "no authorized_keys found in /root/.ssh/, skipping"
     fi
+else
+    COPIED_KEYS=0
 fi
 
 # shell config
@@ -126,6 +114,6 @@ echo "user $NEW_USER created"
 echo "  shell:  /bin/ash"
 echo "  groups: $(id -Gn "$NEW_USER")"
 echo "  doas:   permit persist :wheel"
-if [ "$COPY_KEYS" = "y" ] && [ -s "$USER_HOME/.ssh/authorized_keys" ]; then
+if [ "$COPIED_KEYS" -eq 1 ]; then
     echo "  ssh:    keys copied from root"
 fi

@@ -19,10 +19,10 @@ prompt_yes_no() {
         answer="${answer:-$default}"
 
         case "$answer" in
-            y|Y|yes|YES)
+            y|Y|yes|YES|Yes)
                 return 0
                 ;;
-            n|N|no|NO)
+            n|N|no|NO|No)
                 return 1
                 ;;
             *)
@@ -30,6 +30,19 @@ prompt_yes_no() {
                 ;;
         esac
     done
+}
+
+read_secret() {
+    prompt="$1"
+    old_stty="$(stty -g)"
+
+    printf "%s" "$prompt"
+    trap 'stty "$old_stty"; echo ""; exit 1' INT TERM
+    stty -echo
+    read -r SECRET_RESULT
+    stty "$old_stty"
+    trap - INT TERM
+    echo ""
 }
 
 prompt_positive_int() {
