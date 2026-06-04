@@ -19,7 +19,7 @@ BUILDROOT_SRC     := $(CURDIR)/buildroot-src
 OUTPUT_DIR        := $(CURDIR)/output
 BR2_EXTERNAL      := $(CURDIR)
 
-.PHONY: all base wireguard fetch menuconfig linux-menuconfig wireguard-menuconfig \
+.PHONY: all base wireguard fetch menuconfig linux-menuconfig linux-saveconfig wireguard-menuconfig \
         saveconfig wireguard-saveconfig clean distclean help
 
 all: base
@@ -86,11 +86,15 @@ wireguard-menuconfig: fetch
 		BR2_EXTERNAL=$(BR2_EXTERNAL) tierhive_wireguard_defconfig
 	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/wireguard menuconfig
 
-# save the base config back to its defconfig file
+# save the base buildroot config back to its defconfig file
 saveconfig: fetch
 	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/base \
 		BR2_EXTERNAL=$(BR2_EXTERNAL) savedefconfig \
 		BR2_DEFCONFIG=$(BR2_EXTERNAL)/configs/tierhive_base_defconfig
+
+# save kernel menuconfig changes back to board/tierhive/base/linux.config
+linux-saveconfig: fetch
+	$(MAKE) -C $(BUILDROOT_SRC) O=$(OUTPUT_DIR)/base linux-update-defconfig
 
 # save the wireguard config back to its defconfig file
 wireguard-saveconfig: fetch
@@ -113,9 +117,10 @@ help:
 	@echo "  make fetch                 download buildroot source only"
 	@echo "  make menuconfig            open buildroot menuconfig (base)"
 	@echo "  make linux-menuconfig      open kernel menuconfig (base)"
+	@echo "  make linux-saveconfig      save kernel config back to linux.config"
 	@echo "  make wireguard-menuconfig  open buildroot menuconfig (wireguard)"
-	@echo "  make saveconfig            save base config back to defconfig"
-	@echo "  make wireguard-saveconfig  save wireguard config back to defconfig"
+	@echo "  make saveconfig            save base buildroot config to defconfig"
+	@echo "  make wireguard-saveconfig  save wireguard buildroot config to defconfig"
 	@echo "  make clean                 remove output directory"
 	@echo "  make distclean             remove output and buildroot source"
 	@echo ""
