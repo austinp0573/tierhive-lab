@@ -138,10 +138,12 @@ EOF
 sed -i 's/SYSLOGD_OPTS="-t"/SYSLOGD_OPTS="-t -C64"/' /etc/conf.d/syslog
 
 # reduce block device read-ahead; the default is too large for a vps doing small random i/o
-echo 128 > /sys/block/vda/queue/read_ahead_kb
-cat > /etc/local.d/readahead.start << 'EOF'
+# detect the primary virtio block device - almost always vda on tierhive vps
+BLKDEV=$(ls /sys/block/ | grep -m1 "^vd" 2>/dev/null || echo "vda")
+echo 128 > /sys/block/$BLKDEV/queue/read_ahead_kb
+cat > /etc/local.d/readahead.start << EOF
 #!/bin/sh
-echo 128 > /sys/block/vda/queue/read_ahead_kb
+echo 128 > /sys/block/${BLKDEV}/queue/read_ahead_kb
 EOF
 chmod +x /etc/local.d/readahead.start
 rc-update add local default
