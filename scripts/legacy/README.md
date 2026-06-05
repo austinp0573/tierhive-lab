@@ -5,6 +5,10 @@ these are the original standalone scripts from before the modular runner was bui
 they have been superseded by the scripts in core/ and optional/ but are kept here for reference.
 do not use these in new setups.
 
+note: scripts that sourced lib/common.sh (setup-swap.sh, setup-zram.sh, non-doas-setup.sh) used
+a relative path that assumed they lived at the scripts root. they will fail if run directly from
+this legacy/ directory. they are kept for reference only.
+
 | script | superseded by |
 | ------ | ------------- |
 | alpine-minimal.sh | alternates/minimal-openssh.sh |

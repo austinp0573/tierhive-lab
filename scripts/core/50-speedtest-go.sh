@@ -17,8 +17,10 @@ for cmd in wget tar; do
     command -v $cmd > /dev/null 2>&1 || { echo "error: $cmd is required but not installed"; exit 1; }
 done
 
-TMPDIR=$(mktemp -d)
-cd "$TMPDIR"
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+
+cd "$tmpdir"
 
 echo "downloading speedtest-go v${RELEASE}"
 wget -q "$URL"
@@ -34,10 +36,7 @@ fi
 echo "installing to /usr/local/bin/speedtest"
 mv speedtest-go /usr/local/bin/speedtest
 
-echo "cleaning up"
-cd ~
-rm -rf "$TMPDIR"
-
+cd /
 echo "verifying"
 which speedtest
 speedtest --version
