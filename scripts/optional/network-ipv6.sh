@@ -7,10 +7,11 @@
 
 set -e
 
-if [ "$(id -u)" -ne 0 ]; then
-    echo "must be run as root"
-    exit 1
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+. "$SCRIPT_DIR/lib/common.sh"
+
+require_root
 
 echo "network optimization"
 echo ""
@@ -52,15 +53,16 @@ fi
 echo "buffer sizes set for ${MEM_MB}MB ram (rmem_max=${RMEM_MAX})"
 
 echo ""
-printf "enable ipv6? [y/n, default: n]: "
-read -r WANT_IPV6
-WANT_IPV6="${WANT_IPV6:-n}"
+WANT_IPV6=0
+if prompt_yes_no "enable ipv6?" "n"; then
+    WANT_IPV6=1
+fi
 
 USER_IPV6=""
 USER_GATEWAY=""
 IPV6_WAS_KERNEL_DISABLED=0
 
-if [ "$WANT_IPV6" = "y" ]; then
+if [ "$WANT_IPV6" -eq 1 ]; then
     printf "ipv6 address (e.g. 2a11:6c7:1900:2017::2): "
     read -r USER_IPV6
     printf "ipv6 gateway (e.g. 2a11:6c7:1900:2017::1): "
@@ -68,7 +70,7 @@ if [ "$WANT_IPV6" = "y" ]; then
 
     if [ -z "$USER_IPV6" ] || [ -z "$USER_GATEWAY" ]; then
         echo "ipv6 address and gateway are required - skipping ipv6"
-        WANT_IPV6=n
+        WANT_IPV6=0
     fi
 
     # check if the minimal base disabled ipv6 at the kernel level and remove the flag if so
@@ -107,7 +109,7 @@ net.ipv4.tcp_tw_reuse=1
 net.ipv4.tcp_fin_timeout=15
 EOF
 
-if [ "$WANT_IPV6" = "y" ]; then
+if [ "$WANT_IPV6" -eq 1 ]; then
     cat >> /etc/sysctl.d/99-network.conf << 'EOF'
 
 # ipv6
@@ -119,7 +121,7 @@ fi
 
 # if ipv6 was kernel-disabled and we just removed the flag, the ipv6 sysctl keys
 # won't exist until reboot, so apply only ipv4 settings now to avoid errors
-if [ "$WANT_IPV6" = "y" ] && [ "$IPV6_WAS_KERNEL_DISABLED" -eq 1 ]; then
+if [ "$WANT_IPV6" -eq 1 ] && [ "$IPV6_WAS_KERNEL_DISABLED" -eq 1 ]; then
     sysctl -w net.core.default_qdisc=fq 2>/dev/null || true
     sysctl -w net.ipv4.tcp_congestion_control=bbr 2>/dev/null || true
     sysctl -w "net.core.rmem_max=$RMEM_MAX" 2>/dev/null || true
@@ -135,7 +137,7 @@ else
     echo "sysctl settings applied"
 fi
 
-if [ "$WANT_IPV6" = "y" ]; then
+if [ "$WANT_IPV6" -eq 1 ]; then
     echo ""
     echo "configuring static ipv6 in /etc/network/interfaces"
 
@@ -164,7 +166,7 @@ echo ""
 echo "network optimization complete"
 echo "  bbr tcp congestion control enabled"
 echo "  socket buffers scaled for ${MEM_MB}MB ram"
-if [ "$WANT_IPV6" = "y" ]; then
+if [ "$WANT_IPV6" -eq 1 ]; then
     echo "  ipv6 address: $USER_IPV6"
     if [ "$IPV6_WAS_KERNEL_DISABLED" -eq 1 ]; then
         echo "  note: reboot required to activate ipv6"

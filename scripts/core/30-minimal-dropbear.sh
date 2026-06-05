@@ -11,7 +11,7 @@ fi
 
 # install dropbear and swap the service registration before removing other packages
 apk add dropbear
-rc-update del sshd default
+rc-update del sshd default || true
 rc-update add dropbear default
 
 sh "$SCRIPT_DIR/lib/alpine-minimal-base.sh"

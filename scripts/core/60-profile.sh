@@ -40,7 +40,7 @@ EOF
 cat > /etc/profile.d/30-welcome.sh << 'EOF'
 clear
 echo ""
-fastfetch
+command -v fastfetch > /dev/null 2>&1 && fastfetch
 echo ""
 echo "welcome to $HOSTNAME $(whoami)"
 if [ -s /etc/motd ]; then
