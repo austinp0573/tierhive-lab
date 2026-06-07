@@ -21,6 +21,8 @@ alias l='ls --color=auto -Alrth'
 alias df='df -h'
 alias free='free -h'
 alias top='top -d 1'
+alias nerd='nerdctl'
+alias doas='doas '
 
 c() {
     curl -s "cht.sh/$1"
