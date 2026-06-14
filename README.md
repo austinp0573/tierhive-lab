@@ -7,7 +7,7 @@
 - Clone the repository.
 
 ```bash
-https://github.com/austinp0573/tierhive-lab.git
+git clone https://github.com/austinp0573/tierhive-lab.git
 ```
 
 - `cd` into the directory.
