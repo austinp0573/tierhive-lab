@@ -50,6 +50,8 @@ if [ -s /etc/motd ]; then
     cat /etc/motd
 fi
 echo ""
+date
+echo ""
 EOF
 
 # /etc/profile and profile.d already run before this on login, so only root-specific overrides here
