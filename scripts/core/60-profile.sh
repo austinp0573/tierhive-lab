@@ -44,13 +44,12 @@ clear
 echo ""
 command -v fastfetch > /dev/null 2>&1 && fastfetch
 echo ""
-echo "welcome to $HOSTNAME $(whoami)"
+echo "welcome to $HOSTNAME $(whoami) - DATE: $(date)"
 if [ -s /etc/motd ]; then
     echo ""
     cat /etc/motd
 fi
 echo ""
-date
 echo ""
 EOF
 
