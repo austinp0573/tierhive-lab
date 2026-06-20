@@ -4,7 +4,7 @@
 set -e
 
 echo "installing base packages"
-apk add --no-cache fastfetch doas curl
+apk add --no-cache fastfetch doas curl openssh-sftp-server
 
 printf "timezone [default: America/Chicago]: "
 read -r TZ_NAME
