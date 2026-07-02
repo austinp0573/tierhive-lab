@@ -19,7 +19,7 @@ cd tierhive-lab
 - Compress the scripts/ directory in preparation for transport.
 
 ```bash
-tar -cvf - scripts/ | xz -9e > scripts.tar.xz
+tar -cvf - scripts/ | xz > scripts.tar.xz
 ```
 
 - Transfer the scripts to the vps.
